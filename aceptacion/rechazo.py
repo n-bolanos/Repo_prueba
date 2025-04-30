@@ -1,12 +1,28 @@
 from random import random
 import matplotlib.pyplot as plt
 import math
-import time
+
 def graphic(x,y):
     fig,ax = plt.subplots()
     ax.scatter(x,y)
     plt.show()
-x=0
+
+def grafica_densidad(fun,iteraciones=10000000,param=None,redondeo=2):
+    dictionary = {}
+    for i in range(iteraciones):
+        if param is None:
+            value = round(fun(),redondeo)
+        else:
+            value = round(fun(param),redondeo)
+        if value in dictionary:
+                dictionary[value] += 1
+        else:
+                dictionary[value] = 0
+    prop = []
+    for i in dictionary.values():
+        prop.append( (i/iteraciones)*10**redondeo)
+    graphic(dictionary.keys(),prop)
+
 def r_acum_inversa(u:float):
     return (5/3) * u
 
@@ -25,16 +41,6 @@ def metodo_ar():
             if u <= px:
                 return x
 
-
-# dictionary = {}
-# for i in range(10000000):
-#     value = round(metodo_ar(),2)
-#     if value in dictionary:
-#             dictionary[value] += 1
-#     else:
-#             dictionary[value] = 0
-
-# graphic(dictionary.keys(),dictionary.values())
 
 #Punto 2 b
 def r_acum_inv_b(u):
@@ -58,16 +64,6 @@ def metodo_ar_b():
           return x
 
 
-# dictionary = {}
-# for i in range(1000000):
-#     value = round(metodo_ar_b(),2)
-#     if value in dictionary:
-#             dictionary[value] += 1
-#     else:
-#             dictionary[value] = 0
-
-# graphic(dictionary.keys(),dictionary.values())
-
 #Punto 3a
 def tr_inv_a():
    
@@ -81,15 +77,7 @@ def tr_inv_a():
 
     return inv
 
-# dictionary = {}
-# for i in range(1000000):
-#     value = round(tr_inv_a(),2)
-#     if value in dictionary:
-#             dictionary[value] += 1
-#     else:
-#             dictionary[value] = 0
 
-# graphic(dictionary.keys(),dictionary.values())
 
 def ar_a():
      while True:
@@ -104,17 +92,6 @@ def ar_a():
         if u2 <= px:
             return x
         
-dictionary = {}
-# for i in range(1000000):
-#     value = round(ar_a(),2)
-#     if value in dictionary:
-#             dictionary[value] += 1
-#     else:
-#             dictionary[value] = 0
-
-# graphic(dictionary.keys(),dictionary.values())
-
-
 # Punto 3 b
 def tr_inv_b(a:float):
     if a>=0.5 or a<=0:
@@ -135,15 +112,6 @@ def tr_inv_b(a:float):
         
     return ans
     
-dictionary = {}
-for i in range(1000000):
-    value = round(tr_inv_b(0.4),2)
-    if value in dictionary:
-            dictionary[value] += 1
-    else:
-            dictionary[value] = 0
-
-graphic(dictionary.keys(),dictionary.values())
 def ar_b(a:float):
     while True:
         u0 = random()
@@ -158,12 +126,17 @@ def ar_b(a:float):
         u1 = random()
         if u1 <= px:
             return u0
-dictionary = {}
-for i in range(10000000):
-    value = round(ar_b(0.4),2)
-    if value in dictionary:
-            dictionary[value] += 1
-    else:
-            dictionary[value] = 0
 
-graphic(dictionary.keys(),dictionary.values())
+
+#5
+def trans_inv_5():
+    u = random()
+    inversa = (16*u)**(1/4)
+    return inversa
+
+#6 
+def trans_inv_6():
+     u = random()
+     inversa = (27*u)**(1/3)
+     return inversa
+
