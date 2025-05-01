@@ -5,7 +5,5 @@ from random import random
 
 
 def main():
-
-    
-
+    pass
     
