@@ -7,7 +7,7 @@ class Cafeteria:
         '''Constantes globales'''
         self.TIEMPO_CC = 60
         self.TIEMPO_S = 30
-        self.LIMITE_CL_ATENDIDOS = 1
+        self.LIMITE_CL_ATENDIDOS = 1000
 
 
         '''Inicializar las variables de estado'''
@@ -125,7 +125,7 @@ class Cafeteria:
         print(f"\nAverage delay in queue 'Sandwiches' {self.total_delay_S/self.acm_q_S:.3f} seconds\n")
         print(f"\nAverage number in queue 'Sandwiches' {self.area_numq_S/self.reloj:.3f} \n")
         print(f"\nAverage time in table {self.total_time_T/self.num_cl_atendidos:.3f} seconds, equivalent to {self.total_time_T/self.num_cl_atendidos/60 :.3f} minutes \n")
-        print(f"\nTime simulation ended {self.reloj/3600:.3f} hours \n")
+        print(f"\nTime simulation ended {self.reloj/60:.3f} minutes \n")
         
     def llegada(self):
         '''
