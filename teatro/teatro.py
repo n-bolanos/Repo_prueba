@@ -84,9 +84,15 @@ class Teatro:
         print(f"\nAverage delay in queue 'Persona' {self.total_delay_P/self.acm_q_P:.3f} minutes\n")
         
         print(f"\nAverage delay in queue 'Teléfono' {self.total_delay_T/self.acm_q_T:.3f} minutes\n")
- 
+
+        print(f"\nTotal number of clients {self.acm_q_P} \n")
+
+        print(f"\nTotal number of calls {self.acm_q_T} \n")
+        
         print(f"\nTime simulation ended {self.reloj} minutes \n")
-    
+
+        
+
     def llegada_P(self):
         '''
         Esta función simula la llegada en persona de un nuevo cliente al sistema
