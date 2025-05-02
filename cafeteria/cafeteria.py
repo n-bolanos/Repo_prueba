@@ -145,7 +145,7 @@ class Cafeteria:
                     
                 self.eventos[3].append(self.reloj + self.TIEMPO_CC) #Programar la salida de la fila
             else:
-                self.num_cl_q_CC += 1
+                self.num_cl_q_CC += 1   #Se suma la persona a la fila
                 self.arrival_q_CC.append(self.reloj)
                 
         elif fila == 'S':
@@ -171,7 +171,7 @@ class Cafeteria:
             self.arrival_q_S.pop(0) #Actualizar los tiempos de llegada
         else:
             self.num_ser_disp_S += 1    #Liberar un servidor
-            self.eventos[2] = 10**30
+            self.eventos[2] = 10**30    #Se deja a futuro la siguiente salida
         
         self.tipo_q_T.append('S')   #El cliente pasa a la fila de las mesas
         self.asignar_mesa() #Se trata de asignarle una mesa
@@ -186,14 +186,18 @@ class Cafeteria:
             self.num_cl_q_CC -= 1    #Se quita una persona de la cola
             self.total_delay_CC += self.reloj - self.arrival_q_CC[0]  #Actualizar estadísticos
             self.acm_q_CC += 1
-            self.eventos[3].pop(0)
-            self.eventos[3].append(self.reloj + self.TIEMPO_CC)   #Programar siguiente salida
+            
+            #Programar siguiente salida
+            self.eventos[3].pop(0)  #Quitar evento actual 
+            self.eventos[3].append(self.reloj + self.TIEMPO_CC)   #Añadir próximo evento
+            
             self.arrival_q_CC.pop(0) #Actualizar los tiempos de llegada
         else:
             self.num_ser_disp_CC += 1    #Liberar un servidor
-            self.eventos[3].pop(0)
+            
+            self.eventos[3].pop(0) #Quitar el evento actual
             if not self.eventos[3]:
-                self.eventos[3].append(10**30)
+                self.eventos[3].append(10**30) #Se deja al futuro la próxima salida
         
         self.tipo_q_T.append('CC')   #El cliente pasa a la fila de las mesas
         self.asignar_mesa() #Se trata de asignarle una mesa
@@ -207,7 +211,7 @@ class Cafeteria:
         if self.num_disp_T > 0: #Verifica si hay mesas disponibles
             cliente = self.tipo_q_T.pop(0)  #Elimina el cliente de la fila
             
-            # Programa la salida de la mesa            
+            # Programa la salida de la mesa y se guarda su tiempo de llegada           
             if cliente == 'S':
                 self.arr_dep_T.append((self.reloj, self.reloj + self.generador_consumo_S()))
             elif cliente == 'CC':
@@ -239,14 +243,19 @@ class Cafeteria:
         if self.tipo_q_T:   #Si hay personas esperando por una mesa, las asigna
             self.asignar_mesa()
         else:
-            next_dep = self.arr_dep_T[0]  
-            index = 0
-            for i, ele in enumerate(self.arr_dep_T):
-                if ele[1] < next_dep[1]:
-                    next_dep = ele
-                    index = i
-                    
-            self.eventos[4] = (next_dep[0], next_dep[1], index) # Se programa formalmente la siguiente salida
+            #Programar la siguiente salida
+            if self.arr_dep_T:  #Verifica si hay mesas ocupadas aún
+                next_dep = self.arr_dep_T[0]  
+                index = 0
+                
+                for i, ele in enumerate(self.arr_dep_T):
+                    if ele[1] < next_dep[1]:
+                        next_dep = ele
+                        index = i
+                        
+                self.eventos[4] = (next_dep[0], next_dep[1], index) # Se programa formalmente la siguiente salida
+            else:
+                self.eventos[4] = (10**30, 10**30, 0) #Dejar abierta la proxima salida al futuro
         
         return
         
