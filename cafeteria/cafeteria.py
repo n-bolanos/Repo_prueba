@@ -192,6 +192,8 @@ class Cafeteria:
         else:
             self.num_ser_disp_CC += 1    #Liberar un servidor
             self.eventos[3].pop(0)
+            if not self.eventos[3]:
+                self.eventos[3].append(10**30)
         
         self.tipo_q_T.append('CC')   #El cliente pasa a la fila de las mesas
         self.asignar_mesa() #Se trata de asignarle una mesa
@@ -237,7 +239,14 @@ class Cafeteria:
         if self.tipo_q_T:   #Si hay personas esperando por una mesa, las asigna
             self.asignar_mesa()
         else:
-            self.eventos[4] = (10**30, 10**30)
+            next_dep = self.arr_dep_T[0]  
+            index = 0
+            for i, ele in enumerate(self.arr_dep_T):
+                if ele[1] < next_dep[1]:
+                    next_dep = ele
+                    index = i
+                    
+            self.eventos[4] = (next_dep[0], next_dep[1], index) # Se programa formalmente la siguiente salida
         
         return
         
@@ -250,7 +259,6 @@ class Cafeteria:
         self.eventos[1] = self.generador_llegadas() #Programa el primer evento que sucederá: una llegada
         
         while self.num_cl_atendidos <= self.LIMITE_CL_ATENDIDOS:
-            print('Entró')
             self.timing()    #Determina el siguiente tipo de evento a ejecutar
             
             self.update_stats() #Actualizar estadísticos
