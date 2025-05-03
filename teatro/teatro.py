@@ -101,6 +101,7 @@ class Teatro:
         self.eventos[1] = self.reloj + self.generador_llegada_P() #Programar la siguiente llegada
 
         if self.disp_servidor == self.IDLE: #Verifica si el servidor esta disponible
+            self.acm_q_P += 1
             self.disp_servidor = self.BUSY  #Cambia estado del servidor
             self.eventos[3] = self.reloj+ self.generador_servicio_P() #Programa la salida
         else:
@@ -116,6 +117,7 @@ class Teatro:
         self.eventos[2] = self.reloj + self.generador_llegada_T() #Programar la siguiente llegada
 
         if self.disp_servidor == self.IDLE: #Verifica si el servidor esta disponible
+            self.acm_q_T += 1
             self.disp_servidor = self.BUSY  #Cambia estado del servidor
             self.eventos[3] = self.reloj+ self.generador_servicio_P() #Programa la salida
         else:
