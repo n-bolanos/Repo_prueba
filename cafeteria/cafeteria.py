@@ -137,7 +137,6 @@ class Cafeteria:
         
         if fila == 'CC':
             if self.num_ser_disp_CC > 0:
-                self.acm_q_CC += 1  #Sumar un cliente atendido en CC
                 self.num_ser_disp_CC -= 1   #Desmarcar un servidor como disponible
                 
                 if self.eventos[3][0] == 10**30:
@@ -150,7 +149,6 @@ class Cafeteria:
                 
         elif fila == 'S':
             if self.num_ser_disp_S > 0:
-                self.acm_q_S += 1  #Sumar un cliente atendido en CC
                 self.num_ser_disp_S -= 1   #Desmarcar un servidor como disponible
                 self.eventos[2] = self.reloj + self.TIEMPO_S #Programar la salida de la fila
             else:
