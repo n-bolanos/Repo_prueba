@@ -3,26 +3,28 @@ import matplotlib.pyplot as plt
 import math
 
 def graphic(x,y):
-    fig,ax = plt.subplots()
-    ax.scatter(x,y)
-    plt.show()
+    fig,ax = plt.subplots() #Se crea la figura y ejes
+    ax.scatter(x,y) #Se Crea el grafico de puntos
+    plt.show() #Muestra la figura
 
-def grafica_densidad(fun,iteraciones=10000000,param=None,redondeo=2):
-    dictionary = {}
+def grafica_densidad(fun,iteraciones=1000000,param=None,redondeo=2):
+    dictionary = {} #Diccionario para acumular las frecuencias de los valores
     for i in range(iteraciones):
-        if param is None:
-            value = round(fun(),redondeo)
+        if param is None: #Se revisa si la funcion tiene o no parametros
+            value = round(fun(),redondeo) #Se redondea a tantas cifras decimales com se desee
         else:
             value = round(fun(param),redondeo)
+        # Se agrega cada valor al diccionario y se va llevando registro de sus frecuencias
         if value in dictionary:
                 dictionary[value] += 1
         else:
                 dictionary[value] = 0
-    prop = []
-    for i in dictionary.values():
-        prop.append( (i/iteraciones)*10**redondeo)
-    graphic(dictionary.keys(),prop)
 
+    prop = [] #Lista para guardar las proporciones de aparición
+    for i in dictionary.values():
+        #Se guardan las proporciones
+        prop.append( (i/iteraciones)*10**redondeo)
+    graphic(dictionary.keys(),prop) #Se grafican los resultados
 def r_acum_inversa(u:float):
     return (5/3) * u
 
