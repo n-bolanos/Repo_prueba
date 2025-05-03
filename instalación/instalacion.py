@@ -73,6 +73,20 @@ class Instalacion:
         u = random()    
         return round(u*(b-a)+a,3)
          
+    def escoger_serA(self):
+        '''
+        Esta función asigna homogeneamente usarios al servidor A1 o A2
+        '''
+        u = random()
+        
+        if u < 0.5:
+            eleccion = 'A1'
+        else:
+            eleccion = 'A2'
+        
+        return eleccion
+            
+        
     def timing(self):
         '''
         Esta función se encarga del manejo del reloj de la simulación
@@ -133,9 +147,9 @@ class Instalacion:
         Esta función genera el reporte de la simulación
         '''
         print('-------------END OF SIMULATION--------------')
-        print(f"\nAverage delay in queue 'Cliente tipo 1' {self.total_delay_1/self.acm_cl_q_1:.3f} seconds\n")
+        print(f"\nAverage delay in queue 'Cliente tipo 1' {self.total_delay_1/self.acm_cl_q_1:.3f} minutes\n")
         print(f"\nAverage number in queue 'Cliente tipo 1' {self.area_q_1/self.reloj:.3f} \n")
-        print(f"\nAverage delay in queue 'Cliente tipo 2' {self.total_delay_2/self.acm_cl_q_2:.3f} seconds\n")
+        print(f"\nAverage delay in queue 'Cliente tipo 2' {self.total_delay_2/self.acm_cl_q_2:.3f} minutes\n")
         print(f"\nAverage number in queue 'Cliente tipo 2' {self.area_q_2/self.reloj:.3f} \n")
         print(f"\nSpent time proportion of 'server A1' {self.area_cl1_SA1/(self.area_cl1_SA1+self.area_cl2_SA1)*100:.3f}% in 'cliente tipo 1', {self.area_cl2_SA1/(self.area_cl1_SA1+self.area_cl2_SA1)*100:.3f}% in 'cliente tipo 2' \n")
         print(f"\nSpent time proportion of 'server A2' {self.area_cl1_SA2/(self.area_cl1_SA2+self.area_cl2_SA2)*100:.3f}% in 'cliente tipo 1', {self.area_cl2_SA2/(self.area_cl1_SA2+self.area_cl2_SA2)*100:.3f}% in 'cliente tipo 2' \n")
@@ -150,16 +164,29 @@ class Instalacion:
         
         if self.esc_tipo() == 1:    #Verifica si es cliente tipo 1
             
-            if self.est_s_A1[0] == self.IDLE:   #Verifica si el servidor A1 está libre
-                self.acm_cl_q_1 += 1    #Actualiza estadístico
-                self.est_s_A1 = (self.BUSY, 1)  #Cambia estado del servidor
-                self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A1')    #Programa su salida
+            if self.est_s_A1[0] == self.IDLE or self.est_s_A1[0] == self.IDLE: #Verifica si hay algun servidor tipo A libre
+                eleccion = self.escoger_serA() #Escoge aleatoriamente una prioridad para revisar la disponibilidad entre A1 y A2
                 
-            elif self.est_s_A2[0] == self.IDLE:
-                self.acm_cl_q_1 += 1    #Actualiza estadístico
-                self.est_s_A2 = (self.BUSY, 1)  #Cambia estado del servidor
-                self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A2')    #Programa su salida
-                
+                if eleccion == 'A1':
+                    if self.est_s_A1[0] == self.IDLE:   #Verifica si el servidor A1 está libre
+                        self.acm_cl_q_1 += 1    #Actualiza estadístico
+                        self.est_s_A1 = (self.BUSY, 1)  #Cambia estado del servidor
+                        self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A1')    #Programa su salida
+                        
+                    elif self.est_s_A2[0] == self.IDLE:
+                        self.acm_cl_q_1 += 1    #Actualiza estadístico
+                        self.est_s_A2 = (self.BUSY, 1)  #Cambia estado del servidor
+                        self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A2')    #Programa su salida
+                elif eleccion == 'A2':                    
+                    if self.est_s_A2[0] == self.IDLE:
+                        self.acm_cl_q_1 += 1    #Actualiza estadístico
+                        self.est_s_A2 = (self.BUSY, 1)  #Cambia estado del servidor
+                        self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A2')    #Programa su salida
+                    
+                    elif self.est_s_A1[0] == self.IDLE:   #Verifica si el servidor A1 está libre
+                        self.acm_cl_q_1 += 1    #Actualiza estadístico
+                        self.est_s_A1 = (self.BUSY, 1)  #Cambia estado del servidor
+                        self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A1')    #Programa su salida
             elif self.est_s_B[0] == self.IDLE:
                 self.acm_cl_q_1 += 1    #Actualiza estadístico
                 self.est_s_B = (self.BUSY, 1)  #Cambia estado del servidor
@@ -171,24 +198,47 @@ class Instalacion:
                 
         else:
             if self.est_s_B[0] == self.IDLE:
-                if self.est_s_A1[0] == self.IDLE:
-                    self.acm_cl_q_2 += 1    #Actualiza estadístico
+                if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE:
+                    eleccion = self.escoger_serA()
                     
-                    #Cambia estado de servidores
-                    self.est_s_B = (self.BUSY, 2)
-                    self.est_s_A1 = (self.BUSY, 2)
-                    
-                    self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')    #Programa su salida
-                    
-                elif self.est_s_A2 == self.IDLE:
-                    self.acm_cl_q_2 += 1    #Actualiza estadístico
-                    
-                    #Cambia estado de servidores
-                    self.est_s_B = (self.BUSY, 2)
-                    self.est_s_A2 = (self.BUSY, 2)
-                    
-                    self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A2')    #Programa su salida
-                
+                    if eleccion == 'A1':
+                        if self.est_s_A1[0] == self.IDLE:
+                            self.acm_cl_q_2 += 1    #Actualiza estadístico
+                            
+                            #Cambia estado de servidores
+                            self.est_s_B = (self.BUSY, 2)
+                            self.est_s_A1 = (self.BUSY, 2)
+                            
+                            self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')    #Programa su salida
+                            
+                        elif self.est_s_A2 == self.IDLE:
+                            self.acm_cl_q_2 += 1    #Actualiza estadístico
+                            
+                            #Cambia estado de servidores
+                            self.est_s_B = (self.BUSY, 2)
+                            self.est_s_A2 = (self.BUSY, 2)
+                            
+                            self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A2')    #Programa su salida
+                            
+                    elif eleccion == 'A2':
+                        if self.est_s_A2 == self.IDLE:
+                            self.acm_cl_q_2 += 1    #Actualiza estadístico
+                            
+                            #Cambia estado de servidores
+                            self.est_s_B = (self.BUSY, 2)
+                            self.est_s_A2 = (self.BUSY, 2)
+                            
+                            self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A2')    #Programa su salida
+                            
+                        elif self.est_s_A1[0] == self.IDLE:
+                            self.acm_cl_q_2 += 1    #Actualiza estadístico
+                            
+                            #Cambia estado de servidores
+                            self.est_s_B = (self.BUSY, 2)
+                            self.est_s_A1 = (self.BUSY, 2)
+                            
+                            self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')    #Programa su salida
+
                 else:
                     self.num_cl_q_2 += 1
                     self.arrival_q_2.append(self.reloj)
@@ -203,43 +253,6 @@ class Instalacion:
         '''
         Esta función simula la salida de un cliente tipo 1 del sistema
         '''
-        
-        def revisar_fila_1():
-            '''
-            Esta función revisa si hay fila de clientes de tipo 1 y si es posible atenderlos
-            '''
-            
-            if self.num_cl_q_1 > 0: #Se revisa si hay fila
-                
-                #Se revisa la dsiponibilidad de los servidores
-                if self.est_s_A1[0] == self.IDLE:   
-                    self.acm_cl_q_1 += 1    #Actualizar estadístico
-                    self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
-                    self.est_s_A1 = (self.BUSY, 1)  #Se cambia el estado del servidor  
-                    
-                    self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A1') #Se programa la respectiva salida
-                
-                elif self.est_s_A2[0] == self.IDLE:
-                    self.acm_cl_q_1 += 1    #Actualizar estadístico
-                    self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
-                    self.est_s_A2 = (self.BUSY, 1)  #Se cambia el estado del servidor  
-                    
-                    self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A2') #Se programa la respectiva salida
-                
-                elif self.est_s_B[0] == self.IDLE:
-                    self.acm_cl_q_1 += 1    #Actualizar estadístico
-                    self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
-                    self.est_s_B = (self.BUSY, 1)  #Se cambia el estado del servidor  
-                    
-                    self.eventos[2] = (self.reloj + self.generador_salida_1(), 'B') #Se programa la respectiva salida
-                
-                else:
-                    raise Exception('Error!!! No se ejecutó la simulación. No se logró asignar un servidor a un cliente tipo 1.')
-            
-            else:
-                self.eventos[2] = (10**30, None)    # Se deja abierto a futuro la siguiente salida
-                
-            return
                    
         server = self.eventos[2][1] # Recuperar el tipo de servidor que estaba ocupado
        
@@ -250,86 +263,15 @@ class Instalacion:
             self.est_s_A2 = (self.IDLE, None)
         elif server == 'B':
             self.est_s_B = (self.IDLE, None)
+            
+        self.asignar_servidor()
         
-        # Asignar el que siga en la fila
-        if self.num_cl_q_2 > 0:
-            if self.est_s_B[0] == self.IDLE:
-                if self.est_s_A1[0] == self.IDLE:
-                    self.acm_cl_q_2 += 1 # Actualizar estadístico
-                    self.num_cl_q_2 -= 1 # Se quita un cliente tipo 2 de la fila
-                    
-                    # Se cambia el estado de los servidores
-                    self.est_s_B = (self.BUSY, 2)
-                    self.est_s_A1 = (self.BUSY, 2)
-                    
-                    # Se programa la siguiente salida
-                    self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')
-                
-                elif self.est_s_A2[0] == self.IDLE:
-                    self.acm_cl_q_2 += 1 # Actualizar estadístico
-                    self.num_cl_q_2 -= 1 # Se quita un cliente tipo 2 de la fila
-                    
-                    # Se cambia el estado de los servidores
-                    self.est_s_B = (self.BUSY, 2)
-                    self.est_s_A2 = (self.BUSY, 2)
-                    
-                    # Se programa la siguiente salida
-                    self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A2')
-                    
-                else:
-                    self.eventos[3] = (10**30, None) # Se deja abierto a futuro la siguiente salida
-                    revisar_fila_1()
-                    
-            else:
-                self.eventos[3] = (10**30, None) # Se deja abierto a futuro la siguiente salida
-                revisar_fila_1()   
-                
-        else:
-            self.eventos[3] = (10**30, None) # Se deja abierto a futuro la siguiente salida
-            revisar_fila_1()
-        return      
+        return
     
     def salida_2(self):
         '''
         Esta función simula la salida de un cliente tipo 2 del sistema
         '''
-        
-        def revisar_fila_1():
-            '''
-            Esta función revisa si hay fila de clientes de tipo 1 y si es posible atenderlos
-            '''
-            
-            if self.num_cl_q_1 > 0: #Se revisa si hay fila
-                
-                #Se revisa la dsiponibilidad de los servidores
-                if self.est_s_A1[0] == self.IDLE:   
-                    self.acm_cl_q_1 += 1    #Actualizar estadístico
-                    self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
-                    self.est_s_A1 = (self.BUSY, 1)  #Se cambia el estado del servidor  
-                    
-                    self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A1') #Se programa la respectiva salida
-                
-                elif self.est_s_A2[0] == self.IDLE:
-                    self.acm_cl_q_1 += 1    #Actualizar estadístico
-                    self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
-                    self.est_s_A2 = (self.BUSY, 1)  #Se cambia el estado del servidor  
-                    
-                    self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A2') #Se programa la respectiva salida
-                
-                elif self.est_s_B[0] == self.IDLE:
-                    self.acm_cl_q_1 += 1    #Actualizar estadístico
-                    self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
-                    self.est_s_B = (self.BUSY, 1)  #Se cambia el estado del servidor  
-                    
-                    self.eventos[2] = (self.reloj + self.generador_salida_1(), 'B') #Se programa la respectiva salida
-                
-                else:
-                    raise Exception('Error!!! No se ejecutó la simulación. No se logró asignar un servidor a un cliente tipo 1.')
-            
-            else:
-                self.eventos[2] = (10**30, None)    # Se deja abierto a futuro la siguiente salida
-                
-            return
                    
         server = self.eventos[3][1] # Recuperar el tipo de servidor que estaba ocupado
        
@@ -341,32 +283,157 @@ class Instalacion:
         elif server == 'A2':
             self.est_s_A2 = (self.IDLE, None)
 
+        self.asignar_servidor()
         
-        # Asignar el que siga en la fila
+        return
+    
+    def asignar_servidor(self):
+        '''
+        Esta función se encarga de revisar si hay fila de cualquier tipo y asignar un cliente a los servidores libres luego de una salida'''
+        
+        def revisar_fila_1():
+            '''
+            Esta función revisa si hay fila de clientes de tipo 1 y si es posible atenderlos
+            '''
+            
+            if self.num_cl_q_1 > 0: #Se revisa si hay fila
+                
+                if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE:
+                    elecccion = self.escoger_serA()
+                    
+                    if elecccion == 'A1':
+                
+                        #Se revisa la dsiponibilidad de los servidores
+                        if self.est_s_A1[0] == self.IDLE:   
+                            self.acm_cl_q_1 += 1    #Actualizar estadístico
+                            self.total_delay_1 += self.reloj - self.arrival_q_1[0]
+                            
+                            self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
+                            self.arrival_q_1.pop(0)
+                            
+                            self.est_s_A1 = (self.BUSY, 1)  #Se cambia el estado del servidor  
+                            
+                            self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A1') #Se programa la respectiva salida
+                        
+                        elif self.est_s_A2[0] == self.IDLE:
+                            self.acm_cl_q_1 += 1    #Actualizar estadístico
+                            self.total_delay_1 += self.reloj - self.arrival_q_1[0]
+                            
+                            self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
+                            self.arrival_q_1.pop(0)
+                            
+                            self.est_s_A2 = (self.BUSY, 1)  #Se cambia el estado del servidor  
+                            
+                            self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A2') #Se programa la respectiva salida
+                            
+                    elif elecccion == 'A2':
+                        if self.est_s_A2[0] == self.IDLE:
+                            self.acm_cl_q_1 += 1    #Actualizar estadístico
+                            self.total_delay_1 += self.reloj - self.arrival_q_1[0]
+                            
+                            self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
+                            self.arrival_q_1.pop(0)
+                            
+                            self.est_s_A2 = (self.BUSY, 1)  #Se cambia el estado del servidor  
+                            
+                            self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A2') #Se programa la respectiva salida
+                        elif self.est_s_A1[0] == self.IDLE:   
+                            self.acm_cl_q_1 += 1    #Actualizar estadístico
+                            self.total_delay_1 += self.reloj - self.arrival_q_1[0]
+                            
+                            self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
+                            self.arrival_q_1.pop(0)
+                            
+                            self.est_s_A1 = (self.BUSY, 1)  #Se cambia el estado del servidor  
+                            
+                            self.eventos[2] = (self.reloj + self.generador_salida_1(), 'A1') #Se programa la respectiva salida
+                
+                elif self.est_s_B[0] == self.IDLE:
+                    self.acm_cl_q_1 += 1    #Actualizar estadístico
+                    self.total_delay_1 += self.reloj - self.arrival_q_1[0]
+                    
+                    self.num_cl_q_1 -= 1    #Se quita un nuevo cliente de la fila
+                    self.arrival_q_1.pop(0)
+                    
+                    self.est_s_B = (self.BUSY, 1)  #Se cambia el estado del servidor  
+                    
+                    self.eventos[2] = (self.reloj + self.generador_salida_1(), 'B') #Se programa la respectiva salida
+                
+                else:
+                    raise Exception('Error!!! No se ejecutó la simulación. No se logró asignar un servidor a un cliente tipo 1.')
+            
+            else:
+                self.eventos[2] = (10**30, None)    # Se deja abierto a futuro la siguiente salida
+                
+            return
+        
+                # Asignar el que siga en la fila
+        
         if self.num_cl_q_2 > 0:
             if self.est_s_B[0] == self.IDLE:
-                if self.est_s_A1[0] == self.IDLE:
-                    self.acm_cl_q_2 += 1 # Actualizar estadístico
-                    self.num_cl_q_2 -= 1 # Se quita un cliente tipo 2 de la fila
-                    
-                    # Se cambia el estado de los servidores
-                    self.est_s_B = (self.BUSY, 2)
-                    self.est_s_A1 = (self.BUSY, 2)
-                    
-                    # Se programa la siguiente salida
-                    self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')
                 
-                elif self.est_s_A2[0] == self.IDLE:
-                    self.acm_cl_q_2 += 1 # Actualizar estadístico
-                    self.num_cl_q_2 -= 1 # Se quita un cliente tipo 2 de la fila
+                if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE:
+                    eleccion = self.escoger_serA()
                     
-                    # Se cambia el estado de los servidores
-                    self.est_s_B = (self.BUSY, 2)
-                    self.est_s_A2 = (self.BUSY, 2)
-                    
-                    # Se programa la siguiente salida
-                    self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A2')
-                    
+                    if eleccion == 'A1':
+                        if self.est_s_A1[0] == self.IDLE:
+                            self.acm_cl_q_2 += 1 # Actualizar estadísticos
+                            self.total_delay_2 += self.reloj - self.arrival_q_2[0]  
+                            
+                            # Se quita un cliente tipo 2 de la fila
+                            self.num_cl_q_2 -= 1 
+                            self.arrival_q_2.pop(0)
+                            
+                            # Se cambia el estado de los servidores
+                            self.est_s_B = (self.BUSY, 2)
+                            self.est_s_A1 = (self.BUSY, 2)
+                            
+                            # Se programa la siguiente salida
+                            self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')
+                        
+                        elif self.est_s_A2[0] == self.IDLE:
+                            self.acm_cl_q_2 += 1 # Actualizar estadístico
+                            self.total_delay_2 += self.reloj - self.arrival_q_2[0]
+                            
+                            self.num_cl_q_2 -= 1 # Se quita un cliente tipo 2 de la fila
+                            self.arrival_q_2.pop(0)
+                            
+                            # Se cambia el estado de los servidores
+                            self.est_s_B = (self.BUSY, 2)
+                            self.est_s_A2 = (self.BUSY, 2)
+                            
+                            # Se programa la siguiente salida
+                            self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A2')
+                            
+                    elif eleccion == 'A2':
+                        if self.est_s_A2[0] == self.IDLE:
+                            self.acm_cl_q_2 += 1 # Actualizar estadístico
+                            self.total_delay_2 += self.reloj - self.arrival_q_2[0]
+                            
+                            self.num_cl_q_2 -= 1 # Se quita un cliente tipo 2 de la fila
+                            self.arrival_q_2.pop(0)
+                            
+                            # Se cambia el estado de los servidores
+                            self.est_s_B = (self.BUSY, 2)
+                            self.est_s_A2 = (self.BUSY, 2)
+                            
+                            # Se programa la siguiente salida
+                            self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A2')
+                        elif self.est_s_A1[0] == self.IDLE:
+                            self.acm_cl_q_2 += 1 # Actualizar estadísticos
+                            self.total_delay_2 += self.reloj - self.arrival_q_2[0]  
+                            
+                            # Se quita un cliente tipo 2 de la fila
+                            self.num_cl_q_2 -= 1 
+                            self.arrival_q_2.pop(0)
+                            
+                            # Se cambia el estado de los servidores
+                            self.est_s_B = (self.BUSY, 2)
+                            self.est_s_A1 = (self.BUSY, 2)
+                            
+                            # Se programa la siguiente salida
+                            self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')
+                                
                 else:
                     self.eventos[3] = (10**30, None) # Se deja abierto a futuro la siguiente salida
                     revisar_fila_1()
@@ -378,7 +445,7 @@ class Instalacion:
         else:
             self.eventos[3] = (10**30, None) # Se deja abierto a futuro la siguiente salida
             revisar_fila_1()
-        return
+        return   
         
     def main(self):
         '''
@@ -400,3 +467,6 @@ class Instalacion:
         self.report()
             
         return        
+    
+nueva_sim = Instalacion()
+nueva_sim.main()
