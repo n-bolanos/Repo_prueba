@@ -86,8 +86,7 @@ class Instalacion:
             eleccion = 'A2'
         
         return eleccion
-            
-        
+                  
     def timing(self):
         '''
         Esta función se encarga del manejo del reloj de la simulación
@@ -108,12 +107,9 @@ class Instalacion:
         
         # Mantener la integridad de las salidas tipo 1 programadas
         if self.next_evento == 2:
-            print(self.salida_prog_1)
-            print(self.eventos[2])
             self.buscar_prox_salida_1()
             if self.salida_prog_1:  
                 self.salida_prog_1.pop(self.eventos[2][2])
-            print(self.salida_prog_1, '\n\n--\n')
             
         self.last_time = self.reloj
         
@@ -165,13 +161,22 @@ class Instalacion:
         print('Estado serverB: ', self.est_s_B)
         
         print('-------------END OF SIMULATION--------------')
-        print(f"\nAverage delay in queue 'Cliente tipo 1' {self.total_delay_1/self.acm_cl_q_1:.3f} minutes\n")
-        print(f"\nAverage number in queue 'Cliente tipo 1' {self.area_q_1/self.reloj:.3f} \n")
-        print(f"\nAverage delay in queue 'Cliente tipo 2' {self.total_delay_2/self.acm_cl_q_2:.3f} minutes\n")
-        print(f"\nAverage number in queue 'Cliente tipo 2' {self.area_q_2/self.reloj:.3f} \n")
-        print(f"\nSpent time proportion of 'server A1' {self.area_cl1_SA1/(self.reloj)*100:.3f}% in 'cliente tipo 1', {self.area_cl2_SA1/(self.reloj)*100:.3f}% in 'cliente tipo 2' \n")
-        print(f"\nSpent time proportion of 'server A2' {self.area_cl1_SA2/(self.reloj)*100:.3f}% in 'cliente tipo 1', {self.area_cl2_SA2/(self.reloj)*100:.3f}% in 'cliente tipo 2' \n")
-        print(f"\nSpent time proportion of 'server B' {self.area_cl1_SB/(self.reloj)*100:.3f}% in 'cliente tipo 1', {self.area_cl2_SB/(self.reloj)*100:.3f}% in 'cliente tipo 2' \n")
+        print(f"\nAverage delay in queue 'Cliente tipo 1' {self.total_delay_1/self.acm_cl_q_1:.3f} minutes")
+        print(f"Average number in queue 'Cliente tipo 1' {self.area_q_1/self.reloj:.3f}")
+        print(f"\nAverage delay in queue 'Cliente tipo 2' {self.total_delay_2/self.acm_cl_q_2:.3f} minutes")
+        print(f"Average number in queue 'Cliente tipo 2' {self.area_q_2/self.reloj:.3f} \n")
+        print(f"\nSpent time proportion of 'server A1:'")
+        print(f"\t{self.area_cl1_SA1/(self.area_cl1_SA1 + self.area_cl2_SA1)*100:.3f}% in 'cliente tipo 1'")
+        print(f"\t{self.area_cl2_SA1/(self.area_cl1_SA1 + self.area_cl2_SA1)*100:.3f}% in 'cliente tipo 2' \n")
+        print(f"\tTime-out of 'server A1' {(1 -(self.area_cl1_SA1 + self.area_cl2_SA1)/(self.reloj))*100:.3f}% \n")
+        print(f"\nSpent time proportion of 'server A2:'")
+        print(f"\t{self.area_cl1_SA2/(self.area_cl1_SA2 + self.area_cl2_SA2)*100:.3f}% in 'cliente tipo 1'")
+        print(f"\t{self.area_cl2_SA2/(self.area_cl1_SA2 + self.area_cl2_SA2)*100:.3f}% in 'cliente tipo 2' \n")
+        print(f"\tTime-out of 'server A2' {(1 -(self.area_cl1_SA2 + self.area_cl2_SA2)/(self.reloj))*100:.3f}% \n")
+        print(f"\nSpent time proportion of 'server B:'")
+        print(f"\t{self.area_cl1_SB/(self.area_cl1_SB + self.area_cl2_SB)*100:.3f}% in 'cliente tipo 1'")
+        print(f"\t{self.area_cl2_SB/(self.area_cl1_SB + self.area_cl2_SB)*100:.3f}% in 'cliente tipo 2' \n")
+        print(f"\tTime-out of 'server B' {(1 -(self.area_cl1_SB + self.area_cl2_SB)/(self.reloj))*100:.3f}% \n")
         print(f"\nTime simulation ended {self.reloj:.3f} minutes \n")      
     
     def buscar_prox_salida_1(self):
