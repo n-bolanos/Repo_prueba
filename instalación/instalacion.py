@@ -8,9 +8,7 @@ class Instalacion:
         self.IDLE = 1
         self.BUSY = 0
 
-
         '''Inicializar las variables de estado'''
-        
         self.reloj: float = 0.0
         self.last_time: float = 0.0
         self.num_cl_q_1: int = 0
@@ -49,7 +47,8 @@ class Instalacion:
     
     def esc_tipo(self):
         '''
-        Esta función simula la probabilidad de establecer el tipo de un nuevo cliente que llega al sistema'''
+        Esta función simula la probabilidad de establecer el tipo de un nuevo cliente que llega al sistema
+        '''
         u = random()
         
         if u < 0.7:
@@ -95,6 +94,7 @@ class Instalacion:
         self.next_evento = 0
         min_tiempo_next = 10**29
         
+        #Buscar el evento más próximo dentro de la lista de eventos
         for i in range(1,5):
             if i == 2 or i == 3:
                 t_potencial = self.eventos[i][0]  #Para obtener el tiempo dentro de las tuplas programadas
@@ -114,9 +114,13 @@ class Instalacion:
         self.last_time = self.reloj
         
         self.reloj = min_tiempo_next    #Actualizar el reloj de la simulación
+
         return
     
     def update_stats(self):
+        '''
+        Esta función actualiza los estadísticos de áreas cada vez que se realiza un evento
+        '''
         delta = self.reloj - self.last_time
         
         self.area_q_1 += delta*self.num_cl_q_1
@@ -152,9 +156,9 @@ class Instalacion:
         '''
         Esta función genera el reporte de la simulación
         '''
-        print('Numero clientes 1: ', self.acm_cl_q_1)
+        print('Numero clientes 1 atendidos: ', self.acm_cl_q_1)
         print('Numero clientes 1 cola: ', self.num_cl_q_1)
-        print('Numero clientes 2: ', self.acm_cl_q_2)
+        print('Numero clientes 2 atendidos: ', self.acm_cl_q_2)
         print('Numero clientes 2 cola: ', self.num_cl_q_2)
 
         print('-------------END OF SIMULATION--------------')
@@ -178,19 +182,26 @@ class Instalacion:
     
     def buscar_prox_salida_1(self):
         '''
-        Esta función busca la menor salida tipo 1 programada y la coloca como evento en la lista de eventos'''
+        Esta función busca la menor salida tipo 1 programada y la coloca como evento en la lista de eventos
+        '''
         
-        if self.salida_prog_1:
+        if self.salida_prog_1: # Verifica si hay salida de tipo 1 que deban ser programadas
             min_time = self.salida_prog_1[0][0]
             siguiente = self.salida_prog_1[0]
             index = 0
             
+            # Dentro de las salidas que aún no sean programadas, busca la más próxima
             for i, elem in enumerate(self.salida_prog_1):
                 if elem[0] < min_time:
+                    min_time = elem[0]
                     siguiente = elem
                     index = i
-            
+                    
             self.eventos[2] = (siguiente[0], siguiente[1], index)
+            
+        else:
+            self.salida_prog_1.append((10**30, None))
+            
         return
             
     def llegada(self):
@@ -202,7 +213,7 @@ class Instalacion:
         if self.esc_tipo() == 1:    #Verifica si es cliente tipo 1
             
             if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE: #Verifica si hay algun servidor tipo A libre
-                eleccion = self.escoger_serA() #Escoge aleatoriamente una prioridad para revisar la disponibilidad entre A1 y A2
+                eleccion = self.escoger_serA() #Escoge aleatoriamente una prioridad para revisar primero la disponibilidad entre A1 y A2
                 
                 if eleccion == 'A1':
                     if self.est_s_A1[0] == self.IDLE:   #Verifica si el servidor A1 está libre
@@ -218,19 +229,19 @@ class Instalacion:
                         self.buscar_prox_salida_1()
                         
                 elif eleccion == 'A2':                    
-                    if self.est_s_A2[0] == self.IDLE:
+                    if self.est_s_A2[0] == self.IDLE: # Verifica si el servidor A2 está libre
                         self.acm_cl_q_1 += 1    #Actualiza estadístico
                         self.est_s_A2 = (self.BUSY, 1)  #Cambia estado del servidor
                         self.salida_prog_1.append((self.reloj + self.generador_salida_1(), 'A2'))   #Programa su salida
                         self.buscar_prox_salida_1()
                     
-                    elif self.est_s_A1[0] == self.IDLE:   #Verifica si el servidor A1 está libre
+                    elif self.est_s_A1[0] == self.IDLE:
                         self.acm_cl_q_1 += 1    #Actualiza estadístico
                         self.est_s_A1 = (self.BUSY, 1)  #Cambia estado del servidor
                         self.salida_prog_1.append((self.reloj + self.generador_salida_1(), 'A1'))   #Programa su salida
                         self.buscar_prox_salida_1()
                         
-            elif self.est_s_B[0] == self.IDLE:
+            elif self.est_s_B[0] == self.IDLE: # Si ningún servidor A está libre, revisa B
                 self.acm_cl_q_1 += 1    #Actualiza estadístico
                 self.est_s_B = (self.BUSY, 1)  #Cambia estado del servidor
                 self.salida_prog_1.append((self.reloj + self.generador_salida_1(), 'B'))   #Programa su salida
@@ -241,8 +252,8 @@ class Instalacion:
                 self.arrival_q_1.append(self.reloj) #Agregar su llegada a la lista de tiempos
                 
         else:
-            if self.est_s_B[0] == self.IDLE:
-                if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE:
+            if self.est_s_B[0] == self.IDLE: # Verifica si el servidor B está libre
+                if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE: #Revisa si hay al menos un servidor A libre
                     eleccion = self.escoger_serA()
                     
                     if eleccion == 'A1':
@@ -284,12 +295,12 @@ class Instalacion:
                             self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')    #Programa su salida
 
                 else:
-                    self.num_cl_q_2 += 1
-                    self.arrival_q_2.append(self.reloj)
+                    self.num_cl_q_2 += 1 # Lo suma a la fila
+                    self.arrival_q_2.append(self.reloj) # Guarda su tiempo de llegada
                     
             else:
-                self.num_cl_q_2 += 1
-                self.arrival_q_2.append(self.reloj)
+                self.num_cl_q_2 += 1    # Lo suma a la fila
+                self.arrival_q_2.append(self.reloj) #Guarda su tiempo de llegada
                 
         return
     
@@ -298,10 +309,9 @@ class Instalacion:
         Esta función simula la salida de un cliente tipo 1 del sistema
         '''
                    
-        server = self.eventos[2][1] 
-        # Recuperar el tipo de servidor que estaba ocupado
+        server = self.eventos[2][1] # Recuperar el tipo de servidor que estaba ocupado
        
-       # Liberar el servidor ocupado
+        # Liberar el servidor ocupado
         if server == 'A1':
             self.est_s_A1 = (self.IDLE, None)
         elif server == 'A2':
@@ -311,6 +321,7 @@ class Instalacion:
             
         self.asignar_servidor()
         
+        #Programar siguiente salida
         self.buscar_prox_salida_1()
         
         return
@@ -332,6 +343,7 @@ class Instalacion:
 
         self.asignar_servidor()
         
+        # Programar salida al futuro si no se programaron nuevas salidas
         if self.eventos[3][0] == self.reloj:
             self.eventos[3] = (10**30, None)
         
@@ -346,10 +358,10 @@ class Instalacion:
             Esta función revisa si hay fila de clientes de tipo 1 y si es posible atenderlos
             '''
             
-            if self.num_cl_q_1 > 0: #Se revisa si hay fila
+            if self.num_cl_q_1 > 0: #Se revisa si hay fila de tipo 1
                 
-                if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE:
-                    elecccion = self.escoger_serA()
+                if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE: # Verificar si algún servidor A está libre
+                    elecccion = self.escoger_serA() # Escoge aleatoriamente cual servidor A revisar primero
                     
                     if elecccion == 'A1':
                 
@@ -404,7 +416,7 @@ class Instalacion:
                             self.salida_prog_1.append((self.reloj + self.generador_salida_1(), 'A1')) #Se programa la respectiva salida
                             self.buscar_prox_salida_1()
                 
-                elif self.est_s_B[0] == self.IDLE:
+                elif self.est_s_B[0] == self.IDLE: # Si ningún A estaba libre, revisa si el B está libre
                     self.acm_cl_q_1 += 1    #Actualizar estadístico
                     self.total_delay_1 += self.reloj - self.arrival_q_1[0]
                     
@@ -420,19 +432,22 @@ class Instalacion:
                     raise Exception('Error!!! No se ejecutó la simulación. No se logró asignar un servidor a un cliente tipo 1.')
             
             else:
+                
+                #Revisa si hay salidas tipo 1 pendientes por programar
                 self.buscar_prox_salida_1()
+                
+                #Si no hay salida, se programa al futuro
                 if not self.salida_prog_1:
                     self.eventos[2] = (10**30, None)    # Se deja abierto a futuro la siguiente salida
                 
             return
+    
         
-                # Asignar el que siga en la fila
-        
-        if self.num_cl_q_2 > 0:
-            if self.est_s_B[0] == self.IDLE:
+        if self.num_cl_q_2 > 0: # Revisa si hay clientes de tipo 2, porque ellos tienen prioridad
+            if self.est_s_B[0] == self.IDLE:# Revisa si el servidor B está libre
                 
-                if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE:
-                    eleccion = self.escoger_serA()
+                if self.est_s_A1[0] == self.IDLE or self.est_s_A2[0] == self.IDLE: # Verifica si algún servidor A está libre
+                    eleccion = self.escoger_serA() # Escoge aleatoriamente cual servidor A revisar primero
                     
                     if eleccion == 'A1':
                         if self.est_s_A1[0] == self.IDLE:
@@ -478,6 +493,7 @@ class Instalacion:
                             
                             # Se programa la siguiente salida
                             self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A2')
+                            
                         elif self.est_s_A1[0] == self.IDLE:
                             self.acm_cl_q_2 += 1 # Actualizar estadísticos
                             self.total_delay_2 += self.reloj - self.arrival_q_2[0]  
@@ -513,14 +529,14 @@ class Instalacion:
         while True:
             self.timing()    #Determina el siguiente tipo de evento a ejecutar
             
-            self.update_stats()
+            self.update_stats() #Actualiza las estadísticos
             
             if self.next_evento == 4:
                 break
 
             subrutina[self.next_evento]()   #Ejecuta la subrutina del evento correspondiente
             
-        self.report()
+        self.report()   # Genera el reporte de la simulación
             
         return        
     
