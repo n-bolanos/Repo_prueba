@@ -38,7 +38,6 @@ class Cafeteria:
         self.total_delay_S: float = 0.0
         self.total_time_T: float = 0.0
 
-
     def generador_llegadas(self):
         '''
         Esta función genera un valor bajo una distribución ~U(5, 15)
@@ -227,8 +226,7 @@ class Cafeteria:
                     
             self.eventos[4] = (next_dep[0], next_dep[1], index) # Se programa formalmente la siguiente salida
         return
-                
-    
+      
     def salida(self):
         '''
         Esta función simula el evento de la salida de un cliente del sistema
@@ -259,7 +257,6 @@ class Cafeteria:
         
         return
         
-    
     def main(self):
         '''
         Esta función se encarga de iniciar, ejecutar la simulación, y devolver el reporte sobre la misma.
@@ -277,7 +274,6 @@ class Cafeteria:
         self.report()
             
         return
-    
     
 nueva_sim = Cafeteria()
 nueva_sim.main()
