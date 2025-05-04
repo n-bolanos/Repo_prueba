@@ -111,7 +111,8 @@ class Instalacion:
             print(self.salida_prog_1)
             print(self.eventos[2])
             self.buscar_prox_salida_1()
-            self.salida_prog_1.pop(self.eventos[2][2])
+            if self.salida_prog_1:  
+                self.salida_prog_1.pop(self.eventos[2][2])
             print(self.salida_prog_1, '\n\n--\n')
             
         self.last_time = self.reloj
@@ -177,14 +178,17 @@ class Instalacion:
         '''
         Esta función busca la menor salida tipo 1 programada y la coloca como evento en la lista de eventos'''
         
-        min_time = self.salida_prog_1[0][0]
-        siguiente = self.salida_prog_1[0]
-        
-        for i, elem in enumerate(self.salida_prog_1):
-            if elem[0] < min_time:
-                siguiente = elem
-        
-        self.eventos[2] = (siguiente[0], siguiente[1], i)
+        if self.salida_prog_1:
+            min_time = self.salida_prog_1[0][0]
+            siguiente = self.salida_prog_1[0]
+            index = 0
+            
+            for i, elem in enumerate(self.salida_prog_1):
+                if elem[0] < min_time:
+                    siguiente = elem
+                    index = i
+            
+            self.eventos[2] = (siguiente[0], siguiente[1], index)
         return
             
     def llegada(self):
@@ -249,7 +253,7 @@ class Instalacion:
                             
                             self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')    #Programa su salida
                             
-                        elif self.est_s_A2 == self.IDLE:
+                        elif self.est_s_A2[0] == self.IDLE:
                             self.acm_cl_q_2 += 1    #Actualiza estadístico
                             
                             #Cambia estado de servidores
@@ -259,7 +263,7 @@ class Instalacion:
                             self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A2')    #Programa su salida
                             
                     elif eleccion == 'A2':
-                        if self.est_s_A2 == self.IDLE:
+                        if self.est_s_A2[0] == self.IDLE:
                             self.acm_cl_q_2 += 1    #Actualiza estadístico
                             
                             #Cambia estado de servidores
@@ -305,6 +309,8 @@ class Instalacion:
             
         self.asignar_servidor()
         
+        self.buscar_prox_salida_1()
+        
         return
     
     def salida_2(self):
@@ -323,6 +329,9 @@ class Instalacion:
             self.est_s_A2 = (self.IDLE, None)
 
         self.asignar_servidor()
+        
+        if self.eventos[3][0] == self.reloj:
+            self.eventos[3] = (10**30, None)
         
         return
     
@@ -409,6 +418,7 @@ class Instalacion:
                     raise Exception('Error!!! No se ejecutó la simulación. No se logró asignar un servidor a un cliente tipo 1.')
             
             else:
+                self.buscar_prox_salida_1()
                 if not self.salida_prog_1:
                     self.eventos[2] = (10**30, None)    # Se deja abierto a futuro la siguiente salida
                 
@@ -482,15 +492,12 @@ class Instalacion:
                             self.eventos[3] = (self.reloj + self.generador_salida_2(), 'A1')
                                 
                 else:
-                    self.eventos[3] = (10**30, None) # Se deja abierto a futuro la siguiente salida
                     revisar_fila_1()
                     
             else:
-                self.eventos[3] = (10**30, None) # Se deja abierto a futuro la siguiente salida
                 revisar_fila_1()   
                 
         else:
-            self.eventos[3] = (10**30, None) # Se deja abierto a futuro la siguiente salida
             revisar_fila_1()
         return   
         
