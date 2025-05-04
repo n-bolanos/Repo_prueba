@@ -91,8 +91,6 @@ class Teatro:
         
         print(f"\nTime simulation ended {self.reloj} minutes \n")
 
-        
-
     def llegada_P(self):
         '''
         Esta función simula la llegada en persona de un nuevo cliente al sistema
