@@ -156,10 +156,7 @@ class Instalacion:
         print('Numero clientes 1 cola: ', self.num_cl_q_1)
         print('Numero clientes 2: ', self.acm_cl_q_2)
         print('Numero clientes 2 cola: ', self.num_cl_q_2)
-        print('Estado serverA1: ', self.est_s_A1)
-        print('Estado serverA2: ', self.est_s_A2)
-        print('Estado serverB: ', self.est_s_B)
-        
+
         print('-------------END OF SIMULATION--------------')
         print(f"\nAverage delay in queue 'Cliente tipo 1' {self.total_delay_1/self.acm_cl_q_1:.3f} minutes")
         print(f"Average number in queue 'Cliente tipo 1' {self.area_q_1/self.reloj:.3f}")
