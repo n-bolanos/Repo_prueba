@@ -1,5 +1,17 @@
 from random import random
-import math
+from openpyxl import Workbook
+import numpy
+from matplotlib import pyplot
+
+def grafica(times,states,color='blue'):
+    fig,axis = pyplot.subplots()
+    axis = pyplot.plot(times,states,color=color,linewidth=0.5)
+    pyplot.show()
+
+states_cc = []
+states_s = []
+states_t = []
+tiempos = []
 
 class Cafeteria:
     def __init__(self):
@@ -119,12 +131,7 @@ class Cafeteria:
         Esta función genera el reporte de la simulación
         '''
         print('-------------END OF SIMULATION--------------')
-        print(f"\nAverage delay in queue 'Comida Caliente' {self.total_delay_CC/self.acm_q_CC:.3f} seconds\n")
-        print(f"\nAverage number in queue 'Comida Caliente' {self.area_numq_CC/self.reloj:.3f} \n")
-        print(f"\nAverage delay in queue 'Sandwiches' {self.total_delay_S/self.acm_q_S:.3f} seconds\n")
-        print(f"\nAverage number in queue 'Sandwiches' {self.area_numq_S/self.reloj:.3f} \n")
-        print(f"\nAverage time in table {self.total_time_T/self.num_cl_atendidos:.3f} seconds, equivalent to {self.total_time_T/self.num_cl_atendidos/60 :.3f} minutes \n")
-        print(f"\nTime simulation ended {self.reloj/60:.3f} minutes \n")
+        return ["Average delay in queue 'Comida Caliente'",self.total_delay_CC/self.acm_q_CC,"Average number in queue 'Comida Caliente'",self.area_numq_CC/self.reloj,"Average delay in queue 'Sandwiches'",self.total_delay_S/self.acm_q_S,"Average number in queue 'Sandwiches'",self.area_numq_S/self.reloj,"Average time in table",self.total_time_T/self.num_cl_atendidos,"equivalent to",self.total_time_T/self.num_cl_atendidos/60,"Time simulation ended",self.reloj/60]
         
     def llegada(self):
         '''
@@ -225,7 +232,7 @@ class Cafeteria:
                     index = i
                     
             self.eventos[4] = (next_dep[0], next_dep[1], index) # Se programa formalmente la siguiente salida
-            self.num_disp_T -=1
+            self.num_disp_T -= 1
         return
       
     def salida(self):
@@ -266,15 +273,49 @@ class Cafeteria:
         self.eventos[1] = self.generador_llegadas() #Programa el primer evento que sucederá: una llegada
         
         while self.num_cl_atendidos <= self.LIMITE_CL_ATENDIDOS:
+            
+            tiempos.append(self.reloj)
+            states_cc.append(6-self.num_ser_disp_CC)
+            states_s.append(1-self.num_ser_disp_S)
+            states_t.append(self.num_disp_T)
             self.timing()    #Determina el siguiente tipo de evento a ejecutar
             
             self.update_stats() #Actualizar estadísticos
             
             subrutina[self.next_evento]()   #Ejecuta la subrutina del evento correspondiente
         
-        self.report()
+        
             
-        return
+        return self.report()
     
 nueva_sim = Cafeteria()
-nueva_sim.main()
+lista = nueva_sim.main()
+grafica(tiempos,states_cc,color='blue')
+grafica(tiempos,states_s,color='red')
+grafica(tiempos,states_t,color='green')
+# work = Workbook()
+# worksheet = work.active
+# worksheet['A1'] = "Iteración"
+# worksheet['B1'] = lista[0]
+# worksheet['C1'] = lista[2]
+# worksheet['D1'] = lista[4]
+# worksheet['E1'] = lista[6]
+# worksheet['F1'] = lista[8]
+# worksheet['G1'] = lista[10]
+# worksheet['H1'] = lista[12]
+
+
+# n = 15
+# for _ in range(n):
+#     print("it",_)
+#     nueva_sim = Cafeteria()
+#     lista = nueva_sim.main()
+#     print(lista[1])
+#     print(lista[3])
+#     print(lista[5])
+#     print(lista[7])
+#     print(lista[9])
+#     worksheet.append([_,lista[1],lista[3],lista[5],lista[7],lista[9],lista[11],lista[13]])
+
+
+# work.save('Modelos_SIM_data_output.xlsx')
